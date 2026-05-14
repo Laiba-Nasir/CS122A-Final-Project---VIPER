@@ -1,0 +1,24 @@
+# FPGA build artifacts
+fpga/build/
+
+# Pico build artifacts
+pico/build/
+
+# GTKWave temp files
+*.vcd
+*.vvp
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# VS Code
+.vscode/
+
+# Editors
+*.swp
+*.swo
+*~

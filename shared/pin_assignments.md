@@ -1,0 +1,1 @@
+// FPGA + Pico pin table (fill before wiring)

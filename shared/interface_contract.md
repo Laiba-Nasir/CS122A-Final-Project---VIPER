@@ -1,0 +1,1 @@
+// signal names, widths, SPI byte protocol

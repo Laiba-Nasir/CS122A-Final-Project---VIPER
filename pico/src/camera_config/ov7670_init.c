@@ -1,0 +1,1 @@
+// I2C write sequence at boot
