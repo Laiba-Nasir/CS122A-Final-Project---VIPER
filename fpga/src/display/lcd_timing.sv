@@ -11,6 +11,7 @@ module lcd_timing #(
     //outputs
     output reg [9:0] x_cnt,
     output reg [9:0] y_cnt,
+    output LCD_DEN
 );
     //Some of the lcd code from lab 6 will go here
     
