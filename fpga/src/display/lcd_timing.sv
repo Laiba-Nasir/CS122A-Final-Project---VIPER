@@ -12,8 +12,16 @@ module lcd_timing #(
     output reg [9:0] x_cnt,
     output reg [9:0] y_cnt,
 );
-
-    always_ff @(posedge CLK) begin
+    //Some of the lcd code from lab 6 will go here
+    
+    //the parameters for the horizontal(x) and vertical(y) axis have been given
+    /*
+        Parameter	            Horizontal	    Vertical
+        Active region	        480 pixels	    272 lines
+        Buffer Region	        45 clocks	    13 lines
+        Total per line/frame	525 clocks	    285 lines
+    */
+    always @(posedge CLK) begin
         if(rst) begin
             x_cnt <= 0;
             y_cnt <= 0;
