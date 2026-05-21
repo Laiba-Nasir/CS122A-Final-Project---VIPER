@@ -39,4 +39,8 @@ module lcd_timing #(
         end
     end
 
+    //Display Enable (DE)
+    //only high during active. So, we have to make sur ethe axis cnt is less than the active region.
+    assign LCD_DEN = (x_cnt < active_x) && (y_cnt < active_y);
+
 endmodule
