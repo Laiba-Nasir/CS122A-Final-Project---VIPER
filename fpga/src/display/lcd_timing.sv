@@ -2,7 +2,7 @@ module lcd_timing #(
     parameter active_x = 480,
     parameter toFrame_x = 526,
     parameter active_y = 272,
-    parameter totFrame_y = 286,
+    parameter totFrame_y = 286
 )(
     //inputs
     input clk,
