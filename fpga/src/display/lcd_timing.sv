@@ -5,7 +5,7 @@ module lcd_timing #(
     parameter totFrame_y = 286
 )(
     //inputs
-    input clk,
+    input CLK,
     input rst,
 
     //outputs

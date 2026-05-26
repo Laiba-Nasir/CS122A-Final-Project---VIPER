@@ -4,48 +4,39 @@
 module top(
     input logic CLK,
     input logic rst,
+    input logic LCD_PCLK,
+    input logic VSYNC,
+    input logic HSYNC, 
+    input logic [7:0] DE,
 
     output logic LCD_CLK,
     output logic LCD_DEN,
     output logic [4:0] LCD_R,
     output logic [5:0] LCD_G,
-    output logic [4:0] LCD_B
+    output logic [4:0] LCD_B,
+    output logic XCLK
 );
 
 //i will be putting the lcd code on the top.sv
 assign LCD_CLK = CLK;
 
+// we need to declare the internal signals
+logic [15:0] raw_color; //this will store the raw color data from our camera
+logic valid_color;  // stores the valid raw color
+logic frame_valid;  // will store the valid frame signal from our camera
+
+logic [15:0] processed_color;   // store our processed color 
+logic processed_valid;  // store the valid signal
+logic [9:0] cam_x = 0;
+logic [8:0] cam_y = 0;
+
 logic [9:0] lcd_x;
 logic [9:0] lcd_y;
 logic [15:0] lcd_color;
 
-//we need to create a mock camera input for testing purposes
-logic [9:0] cam_x = 0;
-logic [9:0] cam_y = 0;
-logic [15:0] cam_color = 0;
+//instantiation of phase 1 (camera) will go here
 
-//our camera has a 640 x 480 output, so first we need to simulate that
-always_ff @(posedge CLK) begin
-    if (rst) begin
-        cam_x <= 0;
-        cam_y <= 0;
-        cam_color <= 0;
-    end else begin
-        if(cam_x < 639) begin
-            cam_x <= cam_x + 1;
-        end else begin
-            mock_x <= 0;
-            if(cam_y < 479) begin
-                cam_y <= cam_y + 1;
-            end else begin
-                cam_y <= 0;
-            end
-        end
-    end
-
-    //test RGB
-
-end
+//instantiation of phase 3 (color detection) will go here
 
 //now, we need to do camera cropping and some math for addressing the line buffer
 //we know that out active range is 480 x 272 for our LCD while our camera has a 640 x 480 output\
@@ -58,23 +49,24 @@ end
 */
 wire x_cropped = (cam_x >= 80) && (cam_x < 560); // we get 560 by adding our cropped pixels withg our active horizontal range
 wire y_cropped = (cam_y >= 104) && (cam_y < 376); // we get 376 by adding our cropped pixels withg our active vertical range
-wire cropped = x_cropped && y_cropped;
+wire cropped = x_cropped && y_cropped && processed_valid; // we only want to write to our line buffer if the pixel is cropped and valid
 
 //we need to create a write and read address for our line buffer
-wire [9:0] cropped_waddr = (cam_y - 104) * 480 + (cam_x - 80); // we subtract to get the correct address from cropped val
-wire [9:0] cropped_raddr = (lcd_y - 104) * 480 + (lcd_x - 80); 
+wire [9:0] cropped_waddr = (cam_y[0] * 480) + (cam_x - 80); // we subtract to get the correct address from cropped val
+wire [9:0] cropped_raddr = (~cam_y[0] * 480) + lcd_x; // we invert cam_y[0] because we want to our cropped raddr to read from the correct line
+
 
 //instantiate line buffer
-line_buffer line_buffer_inst #(
+line_buffer #(
     .WIDTH(16),
     .NUM_PIXELS(480),
     .LINES(2)
-)(
-    .cam_clk(CLK),
-    .lcd_clk(CLK),
+) line_buffer_inst (
+    .cam_clk(LCD_PCLK),
+    .lcd_clk(LCD_CLK),
     .we(cropped),
     .waddr(cropped_waddr),
-    .wdata(cam_color),
+    .wdata(processed_color),
     .raddr(cropped_raddr),
     .rst(rst),
     .rdata(lcd_color)
@@ -82,7 +74,7 @@ line_buffer line_buffer_inst #(
 
 //instantiate lcd_timing
 lcd_timing lcd_timing_inst(
-    .clk(CLK),
+    .clk(LCD_CLK),
     .rst(rst),
     .x_cnt(lcd_x),
     .y_cnt(lcd_y),
