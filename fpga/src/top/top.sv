@@ -1,5 +1,7 @@
 `include "display/line_buffer.sv"
 `include "display/lcd_timing.sv"
+`include "camera/xclk_gen.sv"
+`include "camera/pixel_capture.sv"
 
 module top(
     input logic CLK,
