@@ -97,7 +97,7 @@ line_buffer #(
 
 //instantiate lcd_timing
 lcd_timing lcd_timing_inst(
-    .clk(LCD_CLK),
+    .CLK(LCD_CLK),
     .rst(rst),
     .x_cnt(lcd_x),
     .y_cnt(lcd_y),
