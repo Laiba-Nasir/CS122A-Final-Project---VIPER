@@ -1,0 +1,63 @@
+BLOCK RESETPATHS;
+BLOCK ASYNCPATHS;
+
+# ===========================================================
+# Board Clock — 25 MHz oscillator on ICESugar-pro
+# ===========================================================
+LOCATE      COMP "CLK"          SITE "P6";
+IOBUF       PORT "CLK"          IO_TYPE=LVCMOS33;
+FREQUENCY   PORT "CLK"          25 MHZ;
+
+# ===========================================================
+# OV7670 Camera — FPGA OUTPUT (active drive to camera)
+# ===========================================================
+LOCATE      COMP "cam_xclk"     SITE "A2";
+IOBUF       PORT "cam_xclk"     DRIVE=4 IO_TYPE=LVCMOS33;
+
+# ===========================================================
+# OV7670 Camera — FPGA INPUTS (camera drives these)
+# ===========================================================
+
+# Sync signals
+LOCATE      COMP "cam_vsync"    SITE "G2";
+IOBUF       PORT "cam_vsync"    IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_href"     SITE "K1";
+IOBUF       PORT "cam_href"     IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_pclk"     SITE "A4";
+IOBUF       PORT "cam_pclk"     IO_TYPE=LVCMOS33;
+
+# Data bus — D[7] is MSB, D[0] is LSB
+LOCATE      COMP "cam_data[7]"  SITE "A5";
+IOBUF       PORT "cam_data[7]"  IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_data[6]"  SITE "B5";
+IOBUF       PORT "cam_data[6]"  IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_data[5]"  SITE "A6";
+IOBUF       PORT "cam_data[5]"  IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_data[4]"  SITE "B6";
+IOBUF       PORT "cam_data[4]"  IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_data[3]"  SITE "A7";
+IOBUF       PORT "cam_data[3]"  IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_data[2]"  SITE "B7";
+IOBUF       PORT "cam_data[2]"  IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_data[1]"  SITE "A8";
+IOBUF       PORT "cam_data[1]"  IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "cam_data[0]"  SITE "B8";
+IOBUF       PORT "cam_data[0]"  IO_TYPE=LVCMOS33;
+
+# ===========================================================
+# Debug LEDs — built-in on ICESugar-pro
+# ===========================================================
+LOCATE      COMP "led_green"    SITE "A11";
+IOBUF       PORT "led_green"    IO_TYPE=LVCMOS33;
+
+LOCATE      COMP "led_red"      SITE "B11";
+IOBUF       PORT "led_red"      IO_TYPE=LVCMOS33;
