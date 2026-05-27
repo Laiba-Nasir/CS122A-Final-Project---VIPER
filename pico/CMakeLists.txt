@@ -28,6 +28,7 @@ target_link_libraries(viper
     hardware_i2c
     hardware_spi
     hardware_pwm
+    hardware_clocks
 )
 
 pico_enable_stdio_usb(viper 1)
