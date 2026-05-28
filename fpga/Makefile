@@ -11,7 +11,7 @@ SRC = $(wildcard src/camera/*.sv src/display/*.sv src/detection/*.sv src/spi/*.s
 synth: $(SRC)
 	mkdir -p build
 	yosys -p "synth_ecp5 -json build/top.json" $^
-	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json build/top.json --textcfg build/top.cfg --lpf constraints/icesugar_pro.lpf --freq 65
+	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json build/top.json --textcfg build/top.cfg --lpf src/constraints/camera.lpf --freq 65
 	ecppack --svf build/top.svf build/top.cfg build/top.bit
 
 clean:

@@ -27,7 +27,7 @@ module lcd_timing #(
             x_cnt <= 0;
             y_cnt <= 0;
         end else begin
-            if (x_cnt < totFrame_X - 1) begin
+            if (x_cnt < totFrame_x - 1) begin
                 x_cnt <= x_cnt + 1;
             end else begin
                 x_cnt <= 0;
