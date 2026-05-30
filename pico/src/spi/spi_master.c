@@ -13,7 +13,7 @@
 // we need a data struct 
 typedef struct{
     uint16_t centroid_x;
-    unint16_t centroid_y;
+    uint16_t centroid_y;
     bool color_detected;
 } fpga_centroid;
 
@@ -66,7 +66,7 @@ int main(){
             if(curr_centroid.color_detected){
                 printf("[TARGET DETECTED] x-coordinates: %d, y_coordinates: %d \n", curr_centroid.centroid_x, curr_centroid.centroid_y);
             }else{
-                printf("[TARGET LOST} Searching... \n");
+                printf("[TARGET LOST] Searching... \n");
             }
         }else{
             printf("[ERROR] couldn't read from FPGA \n");
