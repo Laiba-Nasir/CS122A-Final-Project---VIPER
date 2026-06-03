@@ -16,8 +16,8 @@ int ticks = 0; //we need to keep track of how many ticks our program needs to wa
 bool init_ready = false; //we need this so that our main() knows when the program is finished and ready to move on
 
 //states go here
-typedef enum {WAIT, ON, WRITE, RESET, DONE} state_t;
-state_t state = WAIT;
+typedef enum {INIT, ON, WRITE, RESET, DONE} state_t;
+state_t state = INIT;
 
 //here we will right the registers values (most of these are from the datasheet)
 const uint8_t ov7670_init_regs[][2] = {
@@ -83,19 +83,52 @@ uint8_t read_reg(uint8_t reg){
 //we will be using the timer callback from the lab's to replace our TICK function from CS120B. 
 bool 0v7670_TICK(struct repeating_timer *t){
     switch(state){
-        case WAIT:
+        case INIT:
+            state = ON;
             break;
 
         case ON:
+            //we need to wait 100ms for our Camera to power on 
+            if(ticks >= 100){
+                ticks = 0; //we need to reset our ticks 
+                state = WRITE;
+            }else{
+                ticks++;
+            }
             break;
 
         case WRITE:
+            //We have to check if we are at the end of our register list
+            if(ov7670_init_regs[indx][0] == OV7670_REG_TABLE_END){
+                state = DONE;
+            }
+            
+            //if we aren't at the end, write to the current register
+            write_reg(ov7670_init_regs[indx][0], ov7670_init_regs[indx][1]);
+
+            //now, we need to check if we have written into COM7 with the reset value 0x41
+            if(ov7670_init_regs[indx][0] == OV7670_REG_COM7 && ov7670_init_regs[indx][1] == 0x41){ 
+                indx++;
+                ticks = 0;
+                state = RESET;
+            }else{
+                indx++; //if we haven't written into COM7, tick will move onto the next register
+            }
             break;
 
         case RESET:
+            //now, we need to wait 30ms for the camera to reset
+            if(ticks >= 30){
+                ticks = 0;
+                state = WRITE; //go back to write after our reset is done
+            }else{
+                ticks++;
+            }
             break;
 
         case DONE:
+            init_ready = true;
+            return false; //we should stop our timer once we are done
             break;
 
         default:
@@ -106,4 +139,6 @@ bool 0v7670_TICK(struct repeating_timer *t){
 }
 
 //finally, we will work on our init function
-void ov7670_init(){}
+void ov7670_init(){
+    return init_true; //we will be calling our add_repeating_timer function in the main code of our pico
+}
