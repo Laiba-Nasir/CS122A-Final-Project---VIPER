@@ -16,6 +16,7 @@
 #define OV7670_REG_COM8         0x13
 #define OV7670_REG_COM3         0x0C
 #define OV7670_REG_COM2         0x09
+#define OV7670_REG_COM6         0x3D
 
 
 #define OV7670_REG_RGB444       0x8C  //this is a safety net. We will be using RGB565, but we need to make sure the camera knows not to used RGB444
