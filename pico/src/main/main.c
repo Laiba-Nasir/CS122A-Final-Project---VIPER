@@ -5,6 +5,8 @@
 #include "ov7670_regs.h"
 #include "spi_master.h"
 
+#define LASER_PIN 22 //THIS IS NOT THE OFFICIAL LASER PIN   
+
 //extern init_ready from our I2C file so that we can check if our camera is done with initialization
 extern bool init_ready;
 //extern our tick function and ov7670_setup so that we can use them
@@ -20,6 +22,12 @@ bool main_TICK(struct repeating_timer *t){
     if(centroid_read(&centroid)){
         //we need to check if a color was detected
         if(centroid.color_detected){
+            //turn laser on if a color is detected
+            gpio_put(LASER_PIN, 1);
+
+            //now, we need to calculate the peripherals error offset (from the servo)
+            //it goes here
+
             //print the coordinates of the color that was detected
             printf("[COLOR DETECTED] x: %d, y: %d\n", centroid.x, centroid.y);
         }else{
@@ -27,6 +35,8 @@ bool main_TICK(struct repeating_timer *t){
             printf("[NO COLOR DETECTED]\n");
         }
     }else{
+        //turn off laser
+        gpio_put(LASER_PIN, 0);
         //if we don't read data successfully, print out an error message
         printf("[ERROR] Failedto read data from camera\n");
     }
@@ -38,6 +48,8 @@ int main() {
     stdio_init_all();
 
     //call our ov7670 setup function 
+    //make sure to also call the servo init() file
+    spi_master_init();
     ov7670_setup();
 
     //start our repeating timer for our camera
