@@ -81,7 +81,7 @@ uint8_t read_reg(uint8_t reg){
 
 //SM will go here
 //we will be using the timer callback from the lab's to replace our TICK function from CS120B. 
-bool 0v7670_TICK(struct repeating_timer *t){
+bool Ov7670_TICK(struct repeating_timer *t){
     switch(state){
         case INIT:
             state = ON;
