@@ -101,13 +101,14 @@ bool Ov7670_TICK(struct repeating_timer *t){
             //We have to check if we are at the end of our register list
             if(ov7670_init_regs[indx][0] == OV7670_REG_TABLE_END){
                 state = DONE;
+                break;
             }
             
             //if we aren't at the end, write to the current register
             write_reg(ov7670_init_regs[indx][0], ov7670_init_regs[indx][1]);
 
-            //now, we need to check if we have written into COM7 with the reset value 0x41
-            if(ov7670_init_regs[indx][0] == OV7670_REG_COM7 && ov7670_init_regs[indx][1] == 0x41){ 
+            //now, we need to check if we have written into COM7 with the reset value 0x80
+            if(ov7670_init_regs[indx][0] == OV7670_REG_COM7 && ov7670_init_regs[indx][1] == 0x80){ 
                 indx++;
                 ticks = 0;
                 state = RESET;
@@ -136,9 +137,4 @@ bool Ov7670_TICK(struct repeating_timer *t){
     }
 
     return true;
-}
-
-//finally, we will work on our init function
-void ov7670_init(){
-    return init_true; //we will be calling our add_repeating_timer function in the main code of our pico
 }
