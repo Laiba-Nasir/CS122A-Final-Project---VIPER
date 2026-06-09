@@ -7,6 +7,12 @@
 
 #define LASER_PIN 22 //THIS IS NOT THE OFFICIAL LASER PIN   
 
+#define FRAME_WIDTH     640
+#define FRAME_HEIGHT    480
+
+//you need to determine the k value erick
+#define K
+
 //extern init_ready from our I2C file so that we can check if our camera is done with initialization
 extern bool init_ready;
 //extern our tick function and ov7670_setup so that we can use them
@@ -26,11 +32,21 @@ bool main_TICK(struct repeating_timer *t){
             gpio_put(LASER_PIN, 1);
 
             //now, we need to calculate the peripherals error offset (from the servo)
-            //it goes here
+            //The code goes here Erick :D!
+            //float error_x = (float)centroid.centroid_x - (FRAME_WIDTH / 2.0f);
+            //float error_y = (float)centroid.centroid_y - (FRAME_HEIGHT/2.0f);
+
+            //FOR ERICK: put the code for adjusting the angles of the pan and tilt here
+            
+            //FOR ERICK: You can put your clamp code here as well :D
+
+            //FOR ERICK: you can put your servo_write code with the adjusted pan and tilt angles here if ya want
+
 
             //print the coordinates of the color that was detected
-            printf("[COLOR DETECTED] x: %d, y: %d\n", centroid.x, centroid.y);
+            printf("[COLOR DETECTED] x: %d, y: %d\n", centroid.centroid.x, centroid.centroid.y);
         }else{
+            gpio_put(LASER_PIN, 0);
             //if there is no color or if it lost tracking, print out a message
             printf("[NO COLOR DETECTED]\n");
         }
@@ -38,7 +54,7 @@ bool main_TICK(struct repeating_timer *t){
         //turn off laser
         gpio_put(LASER_PIN, 0);
         //if we don't read data successfully, print out an error message
-        printf("[ERROR] Failedto read data from camera\n");
+        printf("[ERROR] Failed to read data from camera\n");
     }
 
     return true;
@@ -61,6 +77,21 @@ int main() {
 
     //initialize our spi
     spi_master_init();
+
+    //servos
+    //these were retrieved from Erick's branch
+    servo_init(PAN_PIN);
+    servo_init(TILT_PIN);
+ 
+    // Center both axes, then pause to let them settle.
+    servo_write(PAN_PIN, 90);
+    servo_write(TILT_PIN, 90);
+    sleep_ms(500);
+
+    //laser
+    gpio_init(LASER_PIN);
+    gpio_set_dir(LASER_PIN, GPIO_OUT);
+    gpio_put(LASER_PIN, 0);
 
     //initialize main timer
     struct repeating_timer main_timer;
