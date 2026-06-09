@@ -1,3 +1,10 @@
+
+// MOST TIME CONSUMING FILE!!!!
+// for the line buffer,we 1st used lab6 and got image detection [mid point]
+// we used AI to test and debug with diff buffers and realized this double buffer was the best 
+
+
+
 module line_buffer #(
     parameter WIDTH = 16,
     parameter NUM_PIXELS = 480,
@@ -5,11 +12,13 @@ module line_buffer #(
     parameter ADDR_WIDTH = $clog2(NUM_PIXELS * LINES)
 )(
     //inputs
-    //remember, we need to seperate our read and write clocks
-    //this is because the LCD and camera have different frequences
+    // we need to seperate our read and write clocks
+    //this is because the LCD and camera have diff frequences
     input logic cam_clk, 
     input logic lcd_clk,
     input logic we,
+
+    // i tested multupel versions of these inputs with AI and noticed these ones gave the best reuslts 
     input logic [ADDR_WIDTH-1:0] waddr,
     input logic [WIDTH-1:0] wdata,
     input logic [ADDR_WIDTH-1:0] raddr,

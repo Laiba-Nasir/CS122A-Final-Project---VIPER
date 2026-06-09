@@ -1,24 +1,21 @@
 BLOCK RESETPATHS;
 BLOCK ASYNCPATHS;
 
-# ===========================================================
+
 # Board Clock — 25 MHz oscillator on ICESugar-pro
-# ===========================================================
+
 LOCATE      COMP "CLK"          SITE "P6";
 IOBUF       PORT "CLK"          IO_TYPE=LVCMOS33;
 FREQUENCY   PORT "CLK"          25 MHZ;
 
-# ===========================================================
 # OV7670 Camera — FPGA OUTPUT (active drive to camera)
-#   top.sv port: XCLK  (camera master clock)
-# ===========================================================
+
 LOCATE      COMP "XCLK"         SITE "A2";
 IOBUF       PORT "XCLK"         DRIVE=4 IO_TYPE=LVCMOS33;
 
-# ===========================================================
+
 # OV7670 Camera — FPGA INPUTS (camera drives these)
-#   top.sv ports: VSYNC, HSYNC, LCD_PCLK (= camera pixel clock), DE[7:0] (= camera data)
-# ===========================================================
+
 
 # Sync signals
 LOCATE      COMP "VSYNC"        SITE "G2";
@@ -57,9 +54,9 @@ IOBUF       PORT "DE[1]"        IO_TYPE=LVCMOS33;
 LOCATE      COMP "DE[0]"        SITE "B8";
 IOBUF       PORT "DE[0]"        IO_TYPE=LVCMOS33;
 
-# ===========================================================
+
 # LCD SCREEN PINS ON PORT6
-# ===========================================================
+
 LOCATE COMP "LCD_CLK" SITE "J13";
 IOBUF PORT "LCD_CLK" DRIVE=4 IO_TYPE=LVCMOS33;
 LOCATE COMP "LCD_DEN" SITE "F13";

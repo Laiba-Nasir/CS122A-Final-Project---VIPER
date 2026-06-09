@@ -1,3 +1,6 @@
+// this test bench tests tested my pixel-capture code  - and we checked the numbers in teh terminal - not on hardwre 
+// it was AI genreated 
+
 `timescale 1ns / 1ps
 
 module pixel_capture_tb;

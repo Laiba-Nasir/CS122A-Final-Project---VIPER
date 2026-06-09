@@ -1,6 +1,6 @@
-// NOTE: submodules are supplied on the synth/sim command line by the
-// Makefile (the SRC file list), so no `include directives are needed here.
-// Including them again would double-declare every module.
+
+// used AI to add color logic toard end, assited with AI -- color logic is not mapping colors correcltly  for pico 
+// AI assisted with putting togther the pixel logic, testing our modules
 
 module top(
     input logic CLK,
@@ -37,18 +37,17 @@ logic [9:0] lcd_x;
 logic [9:0] lcd_y;
 logic [7:0] lcd_color;   // RGB332 read back from the framebuffer
 
-//instantiation of phase 1 (camera) will go here
-// =========================================================
+
 // XCLK Generator — feed 25 MHz clock to camera
-// =========================================================
+
 xclk_gen u_xclk_gen (
     .CLK(CLK),
     .cam_xclk(XCLK)
 );
 
-// =========================================================
-// Pixel Capture — grab bytes from camera, assemble RGB565
-// =========================================================
+
+// pixel Capture — grab bytes from camera, assemble RGB565
+
 pixel_capture u_pixel_capture (
     .pclk(LCD_PCLK),
     .vsync(VSYNC),
@@ -64,34 +63,18 @@ pixel_capture u_pixel_capture (
 
 //instantiation of phase 3 (color detection) will go here
 
-//now, we need to do camera cropping and some math for addressing the line buffer
-//we know that out active range is 480 x 272 for our LCD while our camera has a 640 x 480 output\
 
-//first we need to crop our camera input so that it can fit on our LCD
-/*
-    since we have 620 and 480 pixels, we subtract and divide them by 2 to get the 
-    number of pixels we need to crop on each side. So, we need to crop 80 pixels on each side for x.
-    for y, you do the same with 480 and 272, which gives us 104.
-*/
 wire x_cropped = (cam_x >= 80) && (cam_x < 560); // we get 560 by adding our cropped pixels withg our active horizontal range
 wire y_cropped = (cam_y >= 104) && (cam_y < 376); // we get 376 by adding our cropped pixels withg our active vertical range
 wire cropped = x_cropped && y_cropped && processed_valid; // we only want to write to our line buffer if the pixel is cropped and valid
 
-// =========================================================
+
 // DOUBLE-BUFFERED frame buffer  (kills the dot/line artifacts)
 // ---------------------------------------------------------
 // Keep TWO frames. The camera writes one buffer while the LCD reads the
 // other, and we swap at frame boundaries so the buffer being displayed is
-// never being written -> no collision sparkle, no tear.
-//
-// NOTE: triple-buffering was tried (fully removes the rate-mismatch
-// residual in simulation) but looked worse on the real panel, so we keep
-// the simpler 2-buffer scheme by choice.
-//
-// Memory: keep the 2x downsample (240x136) AND store 8-bit RGB332. Two
-// buffers = 2 * 240 * 136 * 8b = ~510 Kbit (~32 of 56 EBR) -> fits. RGB565
-// is packed to RGB332 on write and expanded back on read; the detection
-// pipeline can still tap full RGB565 straight from pixel_capture.
+
+
 // =========================================================
 localparam FB_W   = 240;            // downsampled frame width  (480 / 2)
 localparam FB_H   = 136;            // downsampled frame height (272 / 2)

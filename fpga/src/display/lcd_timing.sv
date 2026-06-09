@@ -9,21 +9,12 @@ module lcd_timing #(
     input rst,
 
     //outputs
-    // init to 0 so the counters are deterministic in simulation and at
-    // power-on (the board ties rst low and relies on this initial state).
     output reg [9:0] x_cnt = 0,
     output reg [9:0] y_cnt = 0,
     output LCD_DEN
 );
     //Some of the lcd code from lab 6 will go here
-    
-    //the parameters for the horizontal(x) and vertical(y) axis have been given
-    /*
-        Parameter	            Horizontal	    Vertical
-        Active region	        480 pixels	    272 lines
-        Buffer Region	        45 clocks	    13 lines
-        Total per line/frame	525 clocks	    285 lines
-    */
+    // NOTE - this is tested max, dont change timing furhter 
     always @(posedge CLK) begin
         if(rst) begin
             x_cnt <= 0;
@@ -42,8 +33,7 @@ module lcd_timing #(
         end
     end
 
-    //Display Enable (DE)
-    //only high during active. So, we have to make sur ethe axis cnt is less than the active region.
+    //ddisplay enable [DE] - only high when active 
     assign LCD_DEN = (x_cnt < active_x) && (y_cnt < active_y);
 
 endmodule

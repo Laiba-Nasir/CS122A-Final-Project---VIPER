@@ -1,5 +1,4 @@
 // register address/value table
-// register address/value table
 //we will be using the values from the datasheet: https://www.voti.nl/docs/OV7670.pdf
 
 #ifndef OV7670_REGS_H

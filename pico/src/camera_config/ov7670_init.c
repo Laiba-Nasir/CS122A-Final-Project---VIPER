@@ -1,7 +1,5 @@
 // I2C write sequence at boot
 
-// I2C write sequence at boot
-
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include "ov7670_regs.h"
@@ -15,7 +13,7 @@
 //global variables
 int indx = 0; //we will need to keep track of which register we are writing to next
 int ticks = 0; //we need to keep track of how many ticks our program needs to wait before we can start writing to the camera
-volatile bool init_ready = false; //volatile: written in the timer IRQ, read in main()'s loop
+bool init_ready = false; //we need this so that our main() knows when the program is finished and ready to move on
 
 //states go here
 typedef enum {INIT, ON, WRITE, RESET, DONE} state_t;
@@ -25,7 +23,7 @@ state_t state = INIT;
 const uint8_t ov7670_init_regs[][2] = {
     
     {OV7670_REG_COM7, 0x80}, //reset the camera
-    {OV7670_REG_COM7, 0x04}, //VGA + RGB  (was 0x14 = QVGA+RGB; bit4=0x10 forces QVGA. FPGA crops a 640x480 frame, so we MUST stay VGA)
+    {OV7670_REG_COM7, 0x14}, //we are putting it into RGB mode
     {OV7670_REG_COM15, 0xD0}, //set it to RGB565 
     {OV7670_REG_COM10, 0x00}, //disable power down and enable normal mode(the default in the datasheet is literally 0x00)
     {OV7670_REG_COM14, 0x00}, //we aren't scaling the image. So, it's not needed
@@ -67,24 +65,16 @@ void ov7670_setup(void){
 // we need to write only one register to the camera
 void write_reg(uint8_t reg, uint8_t val){
     uint8_t buf[2] = {reg, val};
-    // 0x21 is the 7-bit SCCB address (0x42 >> 1); SDK takes a 7-bit address.
-    int ret = i2c_write_blocking(i2c0, 0x21, buf, 2, false);
-    if (ret == PICO_ERROR_GENERIC) {
-        // no ACK -> SCCB wiring / pull-ups / address problem, not the value
-        printf("SCCB write FAILED: reg=0x%02X val=0x%02X\n", reg, val);
-    }
+    i2c_write_blocking(i2c0, 0x21, buf, 2, false); //since our SDK expects us to use a 7-bit address, we need to shift our address to the left by 1
 }
 
 //we will be writing a read register function
 //should write into a register and then read from it
 uint8_t read_reg(uint8_t reg){
-    uint8_t val = 0xFF;
+    uint8_t val;
 
-    // SCCB does NOT support a repeated start: send the register pointer with
-    // a STOP (nostop=false), THEN do a separate read transaction.
-    if (i2c_write_blocking(i2c0, 0x21, &reg, 1, false) == PICO_ERROR_GENERIC)
-        return 0xFF;
-    i2c_read_blocking(i2c0, 0x21, &val, 1, false);
+    i2c_write_blocking(i2c0, 0x21, &reg, 1, true); //make sure to keep the connection alive after writing
+    i2c_read_blocking(i2c0, 0x21, &val, 1, false); 
 
     return val;
 }

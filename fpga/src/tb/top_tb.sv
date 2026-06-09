@@ -1,6 +1,10 @@
 `timescale 1ns / 1ps
-// NOTE: all modules (top + submodules) are supplied on the iverilog command
-// line by the Makefile SRC list, so no `include here (it would double-declare).
+
+// we used AI and LAB6 to genreate the top test bench 
+// we incorporated and tested each of these modules incrementally 
+// this was tested on the hardware not terminal 
+
+// NOTE: all modules (top + submodule
 
 module tb_top;
 
