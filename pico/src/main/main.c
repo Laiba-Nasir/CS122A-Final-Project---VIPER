@@ -38,11 +38,11 @@ bool main_TICK(struct repeating_timer *t){
             //float error_y = (float)centroid.centroid_y - (FRAME_HEIGHT/2.0f);
 
             //FOR ERICK: put the code for adjusting the angles of the pan and tilt here
+            //the equations are in the checklist portio of the packet
             
             //FOR ERICK: You can put your clamp code here as well :D
 
             //FOR ERICK: you can put your servo_write code with the adjusted pan and tilt angles here if ya want
-
 
             //print the coordinates of the color that was detected
             printf("[COLOR DETECTED] x: %d, y: %d\n", centroid.centroid_x, centroid.centroid_y);
