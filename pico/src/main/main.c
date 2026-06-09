@@ -12,26 +12,24 @@
 #define FRAME_HEIGHT    480
 
 //you need to determine the k value erick
-//EA
+//EA: this k value determines the speed of the servo
 #define K 0.30f
 
 #define BUZZER_PIN     21          // pick whatever pin you wire it to
 #define LASER_PIN 22  
 
-#define TILT_PIN        0
-#define PAN_PIN         1
+#define TILT_PIN        0 //vertical movement
+#define PAN_PIN         1 //horizontal movement
 
 // ---- Servo pulse + mechanical safety limits -------------------------------
 #define SERVO_MIN_US    500u 
 #define SERVO_MAX_US    2500u
 #define SERVO_FRAME_US  20000u
 
-#define PAN_MIN_DEG    10
+#define PAN_MIN_DEG    10 //this prevents the servo from locking
 #define PAN_MAX_DEG    170
 #define TILT_MIN_DEG   20
 #define TILT_MAX_DEG   150
-
-//EA: next: add calculations below ( )
 
 //EA: add servo write funct here
 static void servo_write(uint gpio, int angle_deg) {
@@ -42,7 +40,7 @@ static void servo_write(uint gpio, int angle_deg) {
     pwm_set_gpio_level(gpio, pulse_us);
 }
 
-//EA: Persists across ticks — these track where the servos are pointing right now.
+//EA:  these track where the servos are pointing right now.
 static int  pan_angle      = 90;
 static int  tilt_angle     = 90;
 static bool prev_detected  = false;
@@ -75,7 +73,6 @@ bool main_TICK(struct repeating_timer *t){
             }
 
             //now, we need to calculate the peripherals error offset (from the servo)
-            //The code goes here Erick :D!
             //EA: 1) Pixel error from frame center.
             float error_x = (float)centroid.centroid_x - (FRAME_WIDTH / 2.0f);
             float error_y = (float)centroid.centroid_y - (FRAME_HEIGHT/2.0f);
@@ -96,6 +93,7 @@ bool main_TICK(struct repeating_timer *t){
 
             //FOR ERICK: you can put your servo_write code with the adjusted pan and tilt angles here if ya want
             // 4) Command the servos.
+            //ea: Any path can be programmed such as side to side or in a square path.
             servo_write(PAN_PIN,  pan_angle);
             servo_write(TILT_PIN, tilt_angle);
 
