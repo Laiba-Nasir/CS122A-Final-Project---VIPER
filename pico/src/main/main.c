@@ -21,12 +21,26 @@
 #define TILT_PIN        0
 #define PAN_PIN         1
 
+// ---- Servo pulse + mechanical safety limits -------------------------------
+#define SERVO_MIN_US    500u 
+#define SERVO_MAX_US    2500u
+#define SERVO_FRAME_US  20000u
+
 #define PAN_MIN_DEG    10
 #define PAN_MAX_DEG    170
 #define TILT_MIN_DEG   20
 #define TILT_MAX_DEG   150
 
+//EA: next: add calculations below ( )
 
+//EA: add servo write funct here
+static void servo_write(uint gpio, int angle_deg) {
+    if (angle_deg < 0)   angle_deg = 0;
+    if (angle_deg > 180) angle_deg = 180;
+    uint span = SERVO_MAX_US - SERVO_MIN_US;
+    uint pulse_us = SERVO_MIN_US + (span * (uint)angle_deg) / 180u;
+    pwm_set_gpio_level(gpio, pulse_us);
+}
 
 //EA: Persists across ticks — these track where the servos are pointing right now.
 static int  pan_angle      = 90;
@@ -70,8 +84,8 @@ bool main_TICK(struct repeating_timer *t){
             //the equations are in the checklist portio of the packet
             //EA: 2) Proportional correction to current angles.
             //EA: Flip the sign on either line if that axis runs the wrong way.
-             pan_angle  -= (int)(K * error_x);
-             tilt_angle += (int)(K * error_y);
+             pan_angle  = 90 - (int)(K * error_x);
+            tilt_angle = 90 + (int)(K * error_y);
             
             //FOR ERICK: You can put your clamp code here as well :D
             //EA: 3) Clamp to the bracket's safe range.
