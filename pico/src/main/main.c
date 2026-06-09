@@ -4,6 +4,7 @@
 #include "hardware/i2c.h"
 #include "ov7670_regs.h"
 #include "spi_master.h"
+#include "servo.h"
 
 #define LASER_PIN 22 //THIS IS NOT THE OFFICIAL LASER PIN   
 
@@ -44,7 +45,7 @@ bool main_TICK(struct repeating_timer *t){
 
 
             //print the coordinates of the color that was detected
-            printf("[COLOR DETECTED] x: %d, y: %d\n", centroid.centroid.x, centroid.centroid.y);
+            printf("[COLOR DETECTED] x: %d, y: %d\n", centroid.centroid_x, centroid.centroid_y);
         }else{
             gpio_put(LASER_PIN, 0);
             //if there is no color or if it lost tracking, print out a message
@@ -65,7 +66,6 @@ int main() {
 
     //call our ov7670 setup function 
     //make sure to also call the servo init() file
-    spi_master_init();
     ov7670_setup();
 
     //start our repeating timer for our camera
