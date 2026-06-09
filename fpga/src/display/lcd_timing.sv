@@ -9,8 +9,10 @@ module lcd_timing #(
     input rst,
 
     //outputs
-    output reg [9:0] x_cnt,
-    output reg [9:0] y_cnt,
+    // init to 0 so the counters are deterministic in simulation and at
+    // power-on (the board ties rst low and relies on this initial state).
+    output reg [9:0] x_cnt = 0,
+    output reg [9:0] y_cnt = 0,
     output LCD_DEN
 );
     //Some of the lcd code from lab 6 will go here
@@ -27,7 +29,7 @@ module lcd_timing #(
             x_cnt <= 0;
             y_cnt <= 0;
         end else begin
-            if (x_cnt < totFrame_X - 1) begin
+            if (x_cnt < totFrame_x - 1) begin
                 x_cnt <= x_cnt + 1;
             end else begin
                 x_cnt <= 0;

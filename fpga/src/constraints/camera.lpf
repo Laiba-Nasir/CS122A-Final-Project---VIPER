@@ -10,54 +10,92 @@ FREQUENCY   PORT "CLK"          25 MHZ;
 
 # ===========================================================
 # OV7670 Camera — FPGA OUTPUT (active drive to camera)
+#   top.sv port: XCLK  (camera master clock)
 # ===========================================================
-LOCATE      COMP "cam_xclk"     SITE "A2";
-IOBUF       PORT "cam_xclk"     DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE      COMP "XCLK"         SITE "A2";
+IOBUF       PORT "XCLK"         DRIVE=4 IO_TYPE=LVCMOS33;
 
 # ===========================================================
 # OV7670 Camera — FPGA INPUTS (camera drives these)
+#   top.sv ports: VSYNC, HSYNC, LCD_PCLK (= camera pixel clock), DE[7:0] (= camera data)
 # ===========================================================
 
 # Sync signals
-LOCATE      COMP "cam_vsync"    SITE "G2";
-IOBUF       PORT "cam_vsync"    IO_TYPE=LVCMOS33;
+LOCATE      COMP "VSYNC"        SITE "G2";
+IOBUF       PORT "VSYNC"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_href"     SITE "K1";
-IOBUF       PORT "cam_href"     IO_TYPE=LVCMOS33;
+LOCATE      COMP "HSYNC"        SITE "K1";
+IOBUF       PORT "HSYNC"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_pclk"     SITE "A4";
-IOBUF       PORT "cam_pclk"     IO_TYPE=LVCMOS33;
+# Camera pixel clock (named LCD_PCLK in top.sv) — OV7670 PCLK = ~25 MHz
+LOCATE      COMP "LCD_PCLK"     SITE "A4";
+IOBUF       PORT "LCD_PCLK"     IO_TYPE=LVCMOS33;
+FREQUENCY   PORT "LCD_PCLK"     25 MHZ;
 
-# Data bus — D[7] is MSB, D[0] is LSB
-LOCATE      COMP "cam_data[7]"  SITE "A5";
-IOBUF       PORT "cam_data[7]"  IO_TYPE=LVCMOS33;
+# Data bus — DE[7] is MSB, DE[0] is LSB
+LOCATE      COMP "DE[7]"        SITE "A5";
+IOBUF       PORT "DE[7]"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_data[6]"  SITE "B5";
-IOBUF       PORT "cam_data[6]"  IO_TYPE=LVCMOS33;
+LOCATE      COMP "DE[6]"        SITE "B5";
+IOBUF       PORT "DE[6]"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_data[5]"  SITE "A6";
-IOBUF       PORT "cam_data[5]"  IO_TYPE=LVCMOS33;
+LOCATE      COMP "DE[5]"        SITE "A6";
+IOBUF       PORT "DE[5]"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_data[4]"  SITE "B6";
-IOBUF       PORT "cam_data[4]"  IO_TYPE=LVCMOS33;
+LOCATE      COMP "DE[4]"        SITE "B6";
+IOBUF       PORT "DE[4]"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_data[3]"  SITE "A7";
-IOBUF       PORT "cam_data[3]"  IO_TYPE=LVCMOS33;
+LOCATE      COMP "DE[3]"        SITE "A7";
+IOBUF       PORT "DE[3]"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_data[2]"  SITE "B7";
-IOBUF       PORT "cam_data[2]"  IO_TYPE=LVCMOS33;
+LOCATE      COMP "DE[2]"        SITE "B7";
+IOBUF       PORT "DE[2]"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_data[1]"  SITE "A8";
-IOBUF       PORT "cam_data[1]"  IO_TYPE=LVCMOS33;
+LOCATE      COMP "DE[1]"        SITE "A8";
+IOBUF       PORT "DE[1]"        IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "cam_data[0]"  SITE "B8";
-IOBUF       PORT "cam_data[0]"  IO_TYPE=LVCMOS33;
+LOCATE      COMP "DE[0]"        SITE "B8";
+IOBUF       PORT "DE[0]"        IO_TYPE=LVCMOS33;
 
 # ===========================================================
-# Debug LEDs — built-in on ICESugar-pro
+# LCD SCREEN PINS ON PORT6
 # ===========================================================
-LOCATE      COMP "led_green"    SITE "A11";
-IOBUF       PORT "led_green"    IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_CLK" SITE "J13";
+IOBUF PORT "LCD_CLK" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_DEN" SITE "F13";
+IOBUF PORT "LCD_DEN" DRIVE=4 IO_TYPE=LVCMOS33;
 
-LOCATE      COMP "led_red"      SITE "B11";
-IOBUF       PORT "led_red"      IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_R[0]" SITE "P11";
+IOBUF PORT "LCD_R[0]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_R[1]" SITE "N12";
+IOBUF PORT "LCD_R[1]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_R[2]" SITE "N13";
+IOBUF PORT "LCD_R[2]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_R[3]" SITE "M12";
+IOBUF PORT "LCD_R[3]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_R[4]" SITE "L14";
+IOBUF PORT "LCD_R[4]" DRIVE=4 IO_TYPE=LVCMOS33;
+
+LOCATE COMP "LCD_G[0]" SITE "P12";
+IOBUF PORT "LCD_G[0]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_G[1]" SITE "P13";
+IOBUF PORT "LCD_G[1]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_G[2]" SITE "P14";
+IOBUF PORT "LCD_G[2]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_G[3]" SITE "M13";
+IOBUF PORT "LCD_G[3]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_G[4]" SITE "L13";
+IOBUF PORT "LCD_G[4]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_G[5]" SITE "K13";
+IOBUF PORT "LCD_G[5]" DRIVE=4 IO_TYPE=LVCMOS33;
+
+LOCATE COMP "LCD_B[0]" SITE "K14";
+IOBUF PORT "LCD_B[0]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_B[1]" SITE "J14";
+IOBUF PORT "LCD_B[1]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_B[2]" SITE "H14";
+IOBUF PORT "LCD_B[2]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_B[3]" SITE "G14";
+IOBUF PORT "LCD_B[3]" DRIVE=4 IO_TYPE=LVCMOS33;
+LOCATE COMP "LCD_B[4]" SITE "F14";
+IOBUF PORT "LCD_B[4]" DRIVE=4 IO_TYPE=LVCMOS33;

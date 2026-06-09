@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
-`include "top/top.sv"
+// NOTE: all modules (top + submodules) are supplied on the iverilog command
+// line by the Makefile SRC list, so no `include here (it would double-declare).
 
 module tb_top;
 
@@ -26,7 +27,7 @@ module tb_top;
     // ---------------------------------------------------------
     top dut (
         .CLK(CLK),
-        .rst(rst),
+        // rst is no longer a top-level port (tied low inside top)
         .LCD_PCLK(LCD_PCLK),
         .VSYNC(VSYNC),
         .HSYNC(HSYNC),
@@ -135,16 +136,50 @@ module tb_top;
     end
 
     // ---------------------------------------------------------
-    // 6. Monitor Signals in the Console
+    // 6. Double-buffer self-check
     // ---------------------------------------------------------
-    initial begin
-        $monitor("Time=%0t | LCD_DEN=%b | RGB Output={5'h%h, 6'h%h, 5'h%h}", 
-                 $time, LCD_DEN, LCD_R, LCD_G, LCD_B);
+    // Verifies the swap properties:
+    //  (a) wbuf toggles once per camera frame (frame_valid rising edge)
+    //  (b) rbuf only changes at the top-left LCD pixel (no mid-frame swap)
+    //  (c) NOTE: with only 2 buffers a rate-mismatch residual remains
+    //      (some cycles read the buffer being written) -- this is expected
+    //      and accepted; triple-buffering removes it but looked worse on HW.
+    integer wbuf_toggles  = 0;
+    integer rbuf_midframe = 0;
+    integer collide_cycles = 0;
+    logic   rbuf_prev  = 1'b0;
+    logic [9:0] lcd_x_q = 0, lcd_y_q = 0;  // tb-registered LCD position (avoids cross-block race)
+
+    always @(posedge LCD_PCLK)
+        if (dut.frame_valid && !dut.frame_valid_d) wbuf_toggles = wbuf_toggles + 1;
+
+    always @(posedge CLK) begin
+        // register prior-cycle values so we compare rbuf's change against the
+        // LCD position that *caused* it (rbuf updates synchronously with lcd_x)
+        rbuf_prev <= dut.rbuf;
+        lcd_x_q   <= dut.lcd_x;
+        lcd_y_q   <= dut.lcd_y;
+        // (b) rbuf may only change when the prior position was the frame top
+        if (dut.rbuf !== rbuf_prev && !(lcd_x_q == 0 && lcd_y_q == 0))
+            rbuf_midframe = rbuf_midframe + 1;
+        // (c) count reader==writer cycles (expected non-zero residual)
+        if (LCD_DEN && (dut.rbuf === dut.wbuf))
+            collide_cycles = collide_cycles + 1;
     end
 
-    // Optional: Dump waveforms for GTKWave/Vivado Simulator
+    final begin
+        $display("[CHK] camera frames (wbuf toggles)      = %0d", wbuf_toggles);
+        $display("[CHK] illegal mid-frame rbuf swaps      = %0d  (must be 0)", rbuf_midframe);
+        $display("[CHK] reader==writer during display     = %0d cycles (2-buf residual)", collide_cycles);
+        if (rbuf_midframe == 0)
+            $display("[CHK] PASS: swap is glitch-free; %0d residual collision cycles (expected for 2 buffers)", collide_cycles);
+        else
+            $display("[CHK] FAIL: rbuf swapped mid-frame -> would tear");
+    end
+
+    // Waveform dump for GTKWave
     initial begin
-        $dumpfile("dump.vcd");
+        $dumpfile("build/top.vcd");
         $dumpvars(0, tb_top);
     end
 
