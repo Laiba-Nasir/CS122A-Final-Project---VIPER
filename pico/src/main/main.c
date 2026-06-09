@@ -2,17 +2,38 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include "hardware/i2c.h"
+#include "hardware/clocks.h"
+#include <stdio.h>
 #include "ov7670_regs.h"
 #include "spi_master.h"
-#include "servo.h"
-
-#define LASER_PIN 22 //THIS IS NOT THE OFFICIAL LASER PIN   
+#include "servo.h" 
 
 #define FRAME_WIDTH     640
 #define FRAME_HEIGHT    480
 
 //you need to determine the k value erick
-#define K
+//EA
+#define K 0.30f
+
+#define BUZZER_PIN     21          // pick whatever pin you wire it to
+#define LASER_PIN 22  
+
+#define TILT_PIN        0
+#define PAN_PIN         1
+
+#define PAN_MIN_DEG    10
+#define PAN_MAX_DEG    170
+#define TILT_MIN_DEG   20
+#define TILT_MAX_DEG   150
+
+
+
+//EA: Persists across ticks — these track where the servos are pointing right now.
+static int  pan_angle      = 90;
+static int  tilt_angle     = 90;
+static bool prev_detected  = false;
+static absolute_time_t buzzer_off_time;
+static bool buzzer_active  = false;
 
 //extern init_ready from our I2C file so that we can check if our camera is done with initialization
 extern bool init_ready;
@@ -32,17 +53,37 @@ bool main_TICK(struct repeating_timer *t){
             //turn laser on if a color is detected
             gpio_put(LASER_PIN, 1);
 
+            //EA: Rising-edge beep: only trigger when detection just BECAME true.
+            if (!prev_detected) {
+                gpio_put(BUZZER_PIN, 1);
+                buzzer_off_time = make_timeout_time_ms(80);   // ~80 ms chirp
+                buzzer_active = true;
+            }
+
             //now, we need to calculate the peripherals error offset (from the servo)
             //The code goes here Erick :D!
-            //float error_x = (float)centroid.centroid_x - (FRAME_WIDTH / 2.0f);
-            //float error_y = (float)centroid.centroid_y - (FRAME_HEIGHT/2.0f);
+            //EA: 1) Pixel error from frame center.
+            float error_x = (float)centroid.centroid_x - (FRAME_WIDTH / 2.0f);
+            float error_y = (float)centroid.centroid_y - (FRAME_HEIGHT/2.0f);
 
             //FOR ERICK: put the code for adjusting the angles of the pan and tilt here
             //the equations are in the checklist portio of the packet
+            //EA: 2) Proportional correction to current angles.
+            //EA: Flip the sign on either line if that axis runs the wrong way.
+             pan_angle  -= (int)(K * error_x);
+             tilt_angle += (int)(K * error_y);
             
             //FOR ERICK: You can put your clamp code here as well :D
+            //EA: 3) Clamp to the bracket's safe range.
+            if (pan_angle  < PAN_MIN_DEG)  pan_angle  = PAN_MIN_DEG;
+            if (pan_angle  > PAN_MAX_DEG)  pan_angle  = PAN_MAX_DEG;
+            if (tilt_angle < TILT_MIN_DEG) tilt_angle = TILT_MIN_DEG;
+            if (tilt_angle > TILT_MAX_DEG) tilt_angle = TILT_MAX_DEG;
 
             //FOR ERICK: you can put your servo_write code with the adjusted pan and tilt angles here if ya want
+            // 4) Command the servos.
+            servo_write(PAN_PIN,  pan_angle);
+            servo_write(TILT_PIN, tilt_angle);
 
             //print the coordinates of the color that was detected
             printf("[COLOR DETECTED] x: %d, y: %d\n", centroid.centroid_x, centroid.centroid_y);
@@ -56,6 +97,13 @@ bool main_TICK(struct repeating_timer *t){
         gpio_put(LASER_PIN, 0);
         //if we don't read data successfully, print out an error message
         printf("[ERROR] Failed to read data from camera\n");
+    }
+    prev_detected = centroid.color_detected;
+
+    // Non-blocking buzzer auto-off: don't use sleep_ms here, it would freeze the tick.
+    if (buzzer_active && absolute_time_diff_us(get_absolute_time(), buzzer_off_time) <= 0) {
+    gpio_put(BUZZER_PIN, 0);
+    buzzer_active = false;
     }
 
     return true;
@@ -84,14 +132,19 @@ int main() {
     servo_init(TILT_PIN);
  
     // Center both axes, then pause to let them settle.
-    servo_write(PAN_PIN, 90);
-    servo_write(TILT_PIN, 90);
-    sleep_ms(500);
+    //EA: code move into tick function. Might need to add time counter to wait, instead of sleep, for the servo to move.
+        servo_write(PAN_PIN, 90);
+        servo_write(TILT_PIN, 90);
+        sleep_ms(1000);
 
     //laser
     gpio_init(LASER_PIN);
     gpio_set_dir(LASER_PIN, GPIO_OUT);
     gpio_put(LASER_PIN, 0);
+    //buzzer
+    gpio_init(BUZZER_PIN);
+    gpio_set_dir(BUZZER_PIN, GPIO_OUT);
+    gpio_put(BUZZER_PIN, 0);
 
     //initialize main timer
     struct repeating_timer main_timer;
