@@ -1,3 +1,5 @@
+//Claude ai was used to help make this file
+
 // PWM + proportional control
 // dual_servo_pico.c
 // Dual-axis (pan/tilt) servo control for the Raspberry Pi Pico 2 W using the
